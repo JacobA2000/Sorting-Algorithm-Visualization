@@ -14,7 +14,7 @@ function setup(){
 
 function run(){
     var algorithmSelectBox = document.getElementById("algorithm-selection");
-    var selectedAlgorithm = algorithmSelectBox.options[algorithmSelectBox.selectedIndex].value;
+    var selectedAlgorithm = parseInt(algorithmSelectBox.options[algorithmSelectBox.selectedIndex].value);
 
     var speedSelectBox = document.getElementById("speed-selection");
     var selectedSpeed = parseInt(speedSelectBox.options[speedSelectBox.selectedIndex].value);
@@ -27,11 +27,10 @@ function run(){
         case 4: playbackSpeed = 200; break;
     }
 
-    if (selectedAlgorithm == "BUBBLE SORT"){
-        bubbleSort(arrayToSort)
-    }
-    else if (selectedAlgorithm == "QUICK SORT"){
-        quickSort(arrayToSort, 0, arrayToSort.length - 1)
+    switch(selectedAlgorithm){
+        case 0: bubbleSort(arrayToSort); break;
+        case 1: quickSort(arrayToSort, 0, arrayToSort.length - 1); break;
+        case 2: insertionSort(arrayToSort); break;
     }
 }
 
@@ -52,6 +51,14 @@ function draw(){
     }
 }
 
+async function swap(arr, a, b){
+    await sleep(playbackSpeed)
+
+    let temp = arr[a];
+    arr[a] = arr[b];
+    arr[b] = temp;
+}
+
 async function bubbleSort(arrayToSort){ 
     for (let i = 0; i < (arrayToSort.length - 1); i++){
         for(let j=0; j < (arrayToSort.length - i - 1); j++){
@@ -63,14 +70,6 @@ async function bubbleSort(arrayToSort){
         }
     }   
     console.log(arrayToSort)
-}
-
-async function swap(arr, a, b){
-    await sleep(playbackSpeed)
-
-    let temp = arr[a];
-    arr[a] = arr[b];
-    arr[b] = temp;
 }
 
 async function quickSort(arr, start, end){
@@ -110,6 +109,20 @@ async function partition(arr, start, end){
     }
 
     return pivotIndex;
+}
+
+async function insertionSort(arr){
+    for(let i = 1; i < arr.length; i++){
+        let current = arr[i];
+        let j = i-1;
+
+        while((j > -1) && (current < arr[j])){
+            await sleep(playbackSpeed);
+            arr[j+1] = arr[j];
+            j--;
+        }
+        arr[j+1] = current
+    }
 }
 
 function sleep(ms){
