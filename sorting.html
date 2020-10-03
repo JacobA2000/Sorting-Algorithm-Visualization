@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel='shortcut icon' type='image/x-icon' href='../images/favicon.png'/>
+  <meta charset="utf-8">
+  <title>Jacob Allen - Sorting Visualization</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
+  <link rel="stylesheet" href="sorting.css">
+  <script type="text/javascript" src=sorting.js></script>
+</head>
+
+<body>
+  <div id="controls">
+    <h1>SORTING ALGORITHMS VISUALIZER</h1>
+    <p>Welcome to the sorting algorithm visualizer, you can select the algorithm to visualize and adjust the playback speed below. For slower algoriths such as bubble sort I would recommend selecting a lower speed. These settings can only be adjusted before running. If you find any bugs they can be reported <a href="https://github.com/JacobA2000/Sorting-Algorithm-Visualization/issues/new" target="_blank">here</a>. More algorithms will be added over time.</p>
+
+    <select name="algorithms" id="algorithm-selection">
+      <option value="BUBBLE SORT" selected="selected">ALGORITHM: BUBBLE SORT</option>
+      <option value="QUICK SORT">ALGORITHIM: QUICK SORT</option>
+    </select>
+
+    <select name="speed" id="speed-selection">
+      <option value="0">SPEED: 0ms DELAY</option>
+      <option value="1">SPEED: 25ms DELAY</option>
+      <option value="2">SPEED: 50ms DELAY</option>
+      <option value="3" selected="selected">SPEED: 100ms DELAY</option>
+      <option value="4">SPEED: 200ms DELAY</option>
+    </select>
+
+    <button onclick=run()>RUN ALGORITHM</button>
+    <button onclick=setup()>RESET</button>
+  </div>
+</body>
+</html>
