@@ -1,7 +1,7 @@
 let arrayToSort = [];
 let w = 10;
 let states = [];
-let playbackSpeed = 100
+let playbackSpeed = 0
 
 /*
 FUNCTION:       SETUP
@@ -47,7 +47,6 @@ function run(){
         case 2: insertionSort(arrayToSort); break;
     }
 }
-
 
 /*
 FUNCTION:       DRAW
