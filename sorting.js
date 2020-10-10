@@ -45,6 +45,7 @@ function run(){
         case 0: bubbleSort(arrayToSort); break;
         case 1: quickSort(arrayToSort, 0, arrayToSort.length - 1); break;
         case 2: insertionSort(arrayToSort); break;
+        case 3: selectionSort(arrayToSort); break;
     }
 }
 
@@ -104,7 +105,6 @@ async function bubbleSort(arrayToSort){
             states[j+1] = -1 
         }
     }   
-    console.log(arrayToSort)
 }
 
 /*
@@ -181,6 +181,28 @@ async function insertionSort(arr){
             j--;
         }
         arr[j+1] = current
+    }
+}
+
+async function selectionSort(arr){
+    for(let i=0; i < arr.length; i++){
+        let min = i;
+
+        for(let j = i + 1; j < arr.length; j++){
+            if(arr[min] > arr[j]){
+                min = j;  
+            }
+        }
+
+        states[i] = 1;
+        states[min] = 0;
+
+        if(min !== i){
+            await swap(arr, i, min);
+        }
+
+        states[min] = -1;
+        states[i] = -1;
     }
 }
 
