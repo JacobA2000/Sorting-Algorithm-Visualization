@@ -4,4 +4,4 @@ A running version of visualizer can be found here: https://www.jacoballen.co.uk/
 
 Current algorithms: Bubble Sort, Quicksort, Insertion Sort
 
-![](https://i.imgur.com/zuOJk3T.gif)
+![](https://i.imgur.com/i2yDpb9.gif)
