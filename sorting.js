@@ -1,7 +1,9 @@
 let arrayToSort = [];
 let w = 10;
 let states = [];
-let playbackSpeed = 0
+let playbackSpeed = 0;
+let algorithmRunning = false;
+let userReset = false;
 
 /*
 FUNCTION:       SETUP
@@ -11,7 +13,7 @@ DESCRIPTION:    SETS UP THE CANVAS, CREATES AN ARRAY FULL OF RANDOM NUMBERS WITH
                 BASED ON SCREEN WIDTH, AND SETS THE STATE OF EACH ITEM IN THE ARRAY.          
 */
 function setup(){
-    createCanvas(windowWidth -200, windowHeight -200);
+    createCanvas(windowWidth - 200, windowHeight - 200);
     arrayToSort = new Array(floor(width/w));
     for(let i = 0; i < arrayToSort.length; i++){
         arrayToSort[i] = random(height)
@@ -27,26 +29,40 @@ DESCRIPTION:    GETS THE SELECTED ALGORITHM AND SPEED, AND RUNS
                 THE SELECTED ALGORITHM AT THAT SPEED.       
 */
 function run(){
-    var algorithmSelectBox = document.getElementById("algorithm-selection");
-    var selectedAlgorithm = parseInt(algorithmSelectBox.options[algorithmSelectBox.selectedIndex].value);
+    if(algorithmRunning == false){
+        var algorithmSelectBox = document.getElementById("algorithm-selection");
+        var selectedAlgorithm = parseInt(algorithmSelectBox.options[algorithmSelectBox.selectedIndex].value);
 
-    var speedSelectBox = document.getElementById("speed-selection");
-    var selectedSpeed = parseInt(speedSelectBox.options[speedSelectBox.selectedIndex].value);
+        var speedSelectBox = document.getElementById("speed-selection");
+        var selectedSpeed = parseInt(speedSelectBox.options[speedSelectBox.selectedIndex].value);
 
-    switch(selectedSpeed){
-        case 0: playbackSpeed = 0; break;
-        case 1: playbackSpeed = 25; break;
-        case 2: playbackSpeed = 50; break;
-        case 3: playbackSpeed = 100; break;
-        case 4: playbackSpeed = 200; break;
+        switch(selectedSpeed){
+            case 0: playbackSpeed = 0; break;
+            case 1: playbackSpeed = 25; break;
+            case 2: playbackSpeed = 50; break;
+            case 3: playbackSpeed = 100; break;
+            case 4: playbackSpeed = 200; break;
+        }
+
+        switch(selectedAlgorithm){
+            case 0: bubbleSort(arrayToSort); break;
+            case 1: quickSort(arrayToSort, 0, arrayToSort.length - 1); break;
+            case 2: insertionSort(arrayToSort); break;
+            case 3: selectionSort(arrayToSort); break;
+        }
     }
-
-    switch(selectedAlgorithm){
-        case 0: bubbleSort(arrayToSort); break;
-        case 1: quickSort(arrayToSort, 0, arrayToSort.length - 1); break;
-        case 2: insertionSort(arrayToSort); break;
-        case 3: selectionSort(arrayToSort); break;
+    else{
+        alert("Can't run more than one instanse of an algorithm!")
     }
+}
+
+/*
+FUNCTION:       RESET
+PARAMETERS:     NONE
+DESCRIPTION:    RESETS THE CANVAS BY REFRESHING THE PAGE     
+*/
+function reset(){
+    location.reload();
 }
 
 /*
@@ -56,14 +72,13 @@ DESCRIPTION:    DRAWS THE GRAPH
 */
 function draw(){
     background(0, 0, 0);
-
     for(let i = 0; i < arrayToSort.length; i++){
         noStroke();
         fill(255);
         if(states[i] == 0){
             fill(255, 0, 0);
         } else if (states[i] == 1){
-            fill(0, 255, 0)
+             fill(0, 255, 0)
         } else{
             fill(255)
         }
@@ -94,6 +109,7 @@ PARAMETERS:     arrayToSort: The array we wish to sort.
 DESCRIPTION:    PERFORMS THE BUBBLESORT ALGORITHM TO SORT THE ARRAY IN ASCENDING ORDER.        
 */
 async function bubbleSort(arrayToSort){ 
+    algorithmRunning = true;
     for (let i = 0; i < (arrayToSort.length - 1); i++){
         for(let j=0; j < (arrayToSort.length - i - 1); j++){
             states[j] = 0;
@@ -104,7 +120,8 @@ async function bubbleSort(arrayToSort){
             states[j] = -1;
             states[j+1] = -1 
         }
-    }   
+    }
+    algorithmRunning = false;
 }
 
 /*
@@ -116,6 +133,7 @@ DESCRIPTION:    PERFORMS THE QUICKSORT ALGORITHM TO SORT IN ASCENDING
                 ORDER USING LOMUTO PARTITIONING 
 */
 async function quickSort(arr, start, end){
+    algorithmRunning = true;
     if(start >= end){
         return;
     }
@@ -124,6 +142,7 @@ async function quickSort(arr, start, end){
     states[index] = -1;
 
     await Promise.all([quickSort(arr, start, index-1), quickSort(arr, index+1, end)]);
+    algorithmRunning = false;
 }
 
 /*
@@ -167,6 +186,7 @@ PARAMETERS:     arr: The array to sort.
 DESCRIPTION:    PERFORMS THE INSERTION SORT ALGORITHM TO SORT THE ARRAY IN ASCENDING ORDER
 */
 async function insertionSort(arr){
+    algorithmRunning = true;
     for(let i = 1; i < arr.length; i++){
         let current = arr[i];
         let j = i-1;
@@ -182,9 +202,18 @@ async function insertionSort(arr){
         }
         arr[j+1] = current
     }
+    algorithmRunning = false;
 }
 
+
+/*
+FUNCTION:       SELECTIONSORT
+PARAMETERS:     arr: The array to sort. 
+
+DESCRIPTION:    PERFORMS THE SELECTION SORT ALGORITHM TO SORT THE ARRAY IN ASCENDING ORDER
+*/
 async function selectionSort(arr){
+    algorithmRunning = true;
     for(let i=0; i < arr.length; i++){
         let min = i;
 
@@ -204,6 +233,7 @@ async function selectionSort(arr){
         states[min] = -1;
         states[i] = -1;
     }
+    algorithmRunning = false;
 }
 
 /*
