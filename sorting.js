@@ -1,9 +1,13 @@
+
+//GLOBAL VARIABLES
 let arrayToSort = [];
 let w = 10;
 let states = [];
 let playbackSpeed = 0;
 let algorithmRunning = false;
-let userReset = false;
+let canvas = null;
+
+//P5.js FUNCTIONS
 
 /*
 FUNCTION:       SETUP
@@ -13,56 +17,13 @@ DESCRIPTION:    SETS UP THE CANVAS, CREATES AN ARRAY FULL OF RANDOM NUMBERS WITH
                 BASED ON SCREEN WIDTH, AND SETS THE STATE OF EACH ITEM IN THE ARRAY.          
 */
 function setup(){
-    createCanvas(windowWidth - 200, windowHeight - 200);
+    canvas = createCanvas(windowWidth - 200, windowHeight - 200);
+    canvas.parent("p5-canvas");
     arrayToSort = new Array(floor(width/w));
     for(let i = 0; i < arrayToSort.length; i++){
         arrayToSort[i] = random(height)
         states[i] = -1;
     }
-}
-
-/*
-FUNCTION:       RUN
-PARAMETERS:     NONE
-
-DESCRIPTION:    GETS THE SELECTED ALGORITHM AND SPEED, AND RUNS 
-                THE SELECTED ALGORITHM AT THAT SPEED.       
-*/
-function run(){
-    if(algorithmRunning == false){
-        var algorithmSelectBox = document.getElementById("algorithm-selection");
-        var selectedAlgorithm = parseInt(algorithmSelectBox.options[algorithmSelectBox.selectedIndex].value);
-
-        var speedSelectBox = document.getElementById("speed-selection");
-        var selectedSpeed = parseInt(speedSelectBox.options[speedSelectBox.selectedIndex].value);
-
-        switch(selectedSpeed){
-            case 0: playbackSpeed = 0; break;
-            case 1: playbackSpeed = 25; break;
-            case 2: playbackSpeed = 50; break;
-            case 3: playbackSpeed = 100; break;
-            case 4: playbackSpeed = 200; break;
-        }
-
-        switch(selectedAlgorithm){
-            case 0: bubbleSort(arrayToSort); break;
-            case 1: quickSort(arrayToSort, 0, arrayToSort.length - 1); break;
-            case 2: insertionSort(arrayToSort); break;
-            case 3: selectionSort(arrayToSort); break;
-        }
-    }
-    else{
-        alert("Can't run more than one instanse of an algorithm!")
-    }
-}
-
-/*
-FUNCTION:       RESET
-PARAMETERS:     NONE
-DESCRIPTION:    RESETS THE CANVAS BY REFRESHING THE PAGE     
-*/
-function reset(){
-    location.reload();
 }
 
 /*
@@ -85,6 +46,8 @@ function draw(){
         rect(i * w, height - arrayToSort[i], w, arrayToSort[i]);
     }
 }
+
+//SORTING FUNCTIONS
 
 /*
 FUNCTION:       SWAP
@@ -236,14 +199,62 @@ async function selectionSort(arr){
     algorithmRunning = false;
 }
 
+//HELPER FUNCTIONS
+
+/*
+FUNCTION:       RUN
+PARAMETERS:     NONE
+
+DESCRIPTION:    GETS THE SELECTED ALGORITHM AND SPEED, AND RUNS 
+                THE SELECTED ALGORITHM AT THAT SPEED.       
+*/
+function run(){
+    if(algorithmRunning == false){
+        var algorithmSelectBox = document.getElementById("algorithm-selection");
+        var selectedAlgorithm = parseInt(algorithmSelectBox.options[algorithmSelectBox.selectedIndex].value);
+
+        var speedSelectBox = document.getElementById("speed-selection");
+        var selectedSpeed = parseInt(speedSelectBox.options[speedSelectBox.selectedIndex].value);
+
+        switch(selectedSpeed){
+            case 0: playbackSpeed = 0; break;
+            case 1: playbackSpeed = 5; break;
+            case 2: playbackSpeed = 25; break;
+            case 3: playbackSpeed = 50; break;
+            case 4: playbackSpeed = 100; break;
+            case 5: playbackSpeed = 200; break;
+        }
+
+        switch(selectedAlgorithm){
+            case 0: bubbleSort(arrayToSort); break;
+            case 1: quickSort(arrayToSort, 0, arrayToSort.length - 1); break;
+            case 2: insertionSort(arrayToSort); break;
+            case 3: selectionSort(arrayToSort); break;
+        }
+    }
+    else{
+        alert("Can't run more than one instance of an algorithm!")
+    }
+}
+
+/*
+FUNCTION:       RESET
+PARAMETERS:     NONE
+DESCRIPTION:    RESETS THE CANVAS BY REFRESHING THE PAGE     
+*/
+function reset(){
+    location.reload();
+}
+
 /*
 FUNCTION:       SLEEP
 PARAMETERS:     ms: The time to sleep in milliseconds
 
-DESCRIPTION:    ASYNCHRONOUSLY SLEEPS EXECUTION WHEN CALLED
+DESCRIPTION:    SLEEPS EXECUTION WHEN CALLED
 */
 function sleep(ms){
-    return new Promise(resolve => setTimeout(resolve, ms));
+    if(playbackSpeed != 0){
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 }
-
 
