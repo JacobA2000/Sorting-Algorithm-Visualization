@@ -6,6 +6,9 @@ let states = [];
 let playbackSpeed = 0;
 let algorithmRunning = false;
 let canvas = null;
+let swaps = 0;
+let timeToExecute = 0;
+let totalDelay = 0;
 
 //P5.js FUNCTIONS
 
@@ -33,18 +36,25 @@ DESCRIPTION:    DRAWS THE GRAPH
 */
 function draw(){
     background(0, 0, 0);
+
     for(let i = 0; i < arrayToSort.length; i++){
         noStroke();
         fill(255);
         if(states[i] == 0){
             fill(255, 0, 0);
         } else if (states[i] == 1){
-             fill(0, 255, 0)
+            fill(0, 255, 0)
         } else{
             fill(255)
         }
         rect(i * w, height - arrayToSort[i], w, arrayToSort[i]);
     }
+
+    textSize(15);
+    stroke(0, 0, 0)
+    strokeWeight(2)
+    textStyle(BOLD);
+    text("Array Length: " + arrayToSort.length + "\nSwaps: " + swaps + "\nExecution Time: " + timeToExecute + "ms" + "\nTotal Delay: " + totalDelay + "ms", 20, 20);
 }
 
 //SORTING FUNCTIONS
@@ -63,6 +73,8 @@ async function swap(arr, a, b){
     let temp = arr[a];
     arr[a] = arr[b];
     arr[b] = temp;
+
+    swaps++;
 }
 
 /*
@@ -72,7 +84,6 @@ PARAMETERS:     arrayToSort: The array we wish to sort.
 DESCRIPTION:    PERFORMS THE BUBBLESORT ALGORITHM TO SORT THE ARRAY IN ASCENDING ORDER.        
 */
 async function bubbleSort(arrayToSort){ 
-    algorithmRunning = true;
     for (let i = 0; i < (arrayToSort.length - 1); i++){
         for(let j=0; j < (arrayToSort.length - i - 1); j++){
             states[j] = 0;
@@ -84,7 +95,6 @@ async function bubbleSort(arrayToSort){
             states[j+1] = -1 
         }
     }
-    algorithmRunning = false;
 }
 
 /*
@@ -96,7 +106,6 @@ DESCRIPTION:    PERFORMS THE QUICKSORT ALGORITHM TO SORT IN ASCENDING
                 ORDER USING LOMUTO PARTITIONING 
 */
 async function quickSort(arr, start, end){
-    algorithmRunning = true;
     if(start >= end){
         return;
     }
@@ -105,41 +114,40 @@ async function quickSort(arr, start, end){
     states[index] = -1;
 
     await Promise.all([quickSort(arr, start, index-1), quickSort(arr, index+1, end)]);
-    algorithmRunning = false;
-}
 
-/*
-FUNCTION:       PARTITION
-PARAMETERS:     arr: The array to swap, start: The start of the partition, 
-                end: The end of the partition
+    /*
+    FUNCTION:       PARTITION
+    PARAMETERS:     arr: The array to swap, start: The start of the partition, 
+                    end: The end of the partition
 
-DESCRIPTION:    PARTITION FUNCTION USING LOMUTO PARTIONING TO SORT EACH PARTITION OF THE ARRAY
-*/
-async function partition(arr, start, end){
-    for(let i = start; i < end; i++){
-        states[i] = 1;
-    }
-
-    let pivotValue = arr[end];
-    let pivotIndex = start;
-    states[pivotIndex] = 0;
-    for(let i = start; i < end; i++){
-        if(arr[i] < pivotValue){
-            await swap(arr, i, pivotIndex);
-            states[pivotIndex] = -1;
-            pivotIndex++;
-            states[pivotIndex] = 0;
+    DESCRIPTION:    PARTITION FUNCTION USING LOMUTO PARTIONING TO SORT EACH PARTITION OF THE ARRAY
+    */
+    async function partition(arr, start, end){
+        for(let i = start; i < end; i++){
+            states[i] = 1;
         }
+
+        let pivotValue = arr[end];
+        let pivotIndex = start;
+        states[pivotIndex] = 0;
+        for(let i = start; i < end; i++){
+            if(arr[i] < pivotValue){
+                await swap(arr, i, pivotIndex);
+                states[pivotIndex] = -1;
+                pivotIndex++;
+                states[pivotIndex] = 0;
+            }
+        }
+
+        await swap(arr, pivotIndex, end);
+
+        for(let i = start; i < end; i++){
+            if(i != pivotIndex)
+            states[i] = -1;
+        }
+
+        return pivotIndex;
     }
-
-    await swap(arr, pivotIndex, end);
-
-    for(let i = start; i < end; i++){
-        if(i != pivotIndex)
-        states[i] = -1;
-    }
-
-    return pivotIndex;
 }
 
 /*
@@ -149,7 +157,6 @@ PARAMETERS:     arr: The array to sort.
 DESCRIPTION:    PERFORMS THE INSERTION SORT ALGORITHM TO SORT THE ARRAY IN ASCENDING ORDER
 */
 async function insertionSort(arr){
-    algorithmRunning = true;
     for(let i = 1; i < arr.length; i++){
         let current = arr[i];
         let j = i-1;
@@ -162,10 +169,10 @@ async function insertionSort(arr){
             states[j] = -1
             states[j-1] = -1
             j--;
+            swaps++;
         }
         arr[j+1] = current
     }
-    algorithmRunning = false;
 }
 
 
@@ -176,7 +183,6 @@ PARAMETERS:     arr: The array to sort.
 DESCRIPTION:    PERFORMS THE SELECTION SORT ALGORITHM TO SORT THE ARRAY IN ASCENDING ORDER
 */
 async function selectionSort(arr){
-    algorithmRunning = true;
     for(let i=0; i < arr.length; i++){
         let min = i;
 
@@ -196,7 +202,58 @@ async function selectionSort(arr){
         states[min] = -1;
         states[i] = -1;
     }
-    algorithmRunning = false;
+}
+
+/*
+FUNCTION:       MERGESORT
+PARAMETERS:     arr: The array to sort, leftIndex: the leftmost item in the array, rightIndex: the rightmost item in the array. 
+
+DESCRIPTION:    PERFORMS THE MERGE SORT ALGORITHM TO SORT THE ARRAY IN ASCENDING ORDER
+*/
+async function mergeSort(arr, leftIndex, rightIndex){
+    length = rightIndex - leftIndex
+    if (length < 2) {
+        return arr;
+    }
+    var mid = leftIndex + Math.floor(length / 2);
+
+    await mergeSort(arr, leftIndex, mid);
+    await mergeSort(arr, mid, rightIndex);
+    await merge(arr, leftIndex, mid, rightIndex);
+
+    /*
+    FUNCTION:       MERGES
+    PARAMETERS:     arr: The array to sort, leftIndex: the leftmost item in the array, 
+                    mid: the middle item in the array, rightIndex: the rightmost item in the array. 
+
+    DESCRIPTION:    PERFORMS THE MERGE SORT ALGORITHM TO SORT THE ARRAY IN ASCENDING ORDER
+    */
+    async function merge(arr, leftIndex, mid, rightIndex) {
+        var result = [];
+        var l = leftIndex, r = mid;
+        while (l < mid && r < rightIndex) {
+            if (arr[l] < arr[r]) {
+                states[l] = 0;
+                await sleep(playbackSpeed);
+                states[l] = -1;
+                result.push(arr[l++]);
+            } else {
+                states[r] = 0;
+                await sleep(playbackSpeed);
+                states[r] = -1;
+                result.push(arr[r++]);
+            }
+            swaps++;
+        }
+
+        result = result.concat(arr.slice(l, mid)).concat(arr.slice(r, rightIndex));
+        for (let i = 0; i < rightIndex - leftIndex; i++) {
+            states[leftIndex + i] = 1;
+            await sleep(playbackSpeed);
+            arr[leftIndex + i] = result[i]
+            states[leftIndex + i] = -1;
+        }
+    }
 }
 
 //HELPER FUNCTIONS
@@ -208,8 +265,14 @@ PARAMETERS:     NONE
 DESCRIPTION:    GETS THE SELECTED ALGORITHM AND SPEED, AND RUNS 
                 THE SELECTED ALGORITHM AT THAT SPEED.       
 */
-function run(){
+async function run(){
+    let algorithmStartTime = 0;
+    let algorithmEndTime = 0;
+
     if(algorithmRunning == false){
+        swaps = 0;
+        totalDelay = 0;
+
         var algorithmSelectBox = document.getElementById("algorithm-selection");
         var selectedAlgorithm = parseInt(algorithmSelectBox.options[algorithmSelectBox.selectedIndex].value);
 
@@ -218,18 +281,19 @@ function run(){
 
         switch(selectedSpeed){
             case 0: playbackSpeed = 0; break;
-            case 1: playbackSpeed = 5; break;
-            case 2: playbackSpeed = 25; break;
-            case 3: playbackSpeed = 50; break;
-            case 4: playbackSpeed = 100; break;
-            case 5: playbackSpeed = 200; break;
+            case 1: playbackSpeed = 1; break;
+            case 2: playbackSpeed = 5; break;
+            case 3: playbackSpeed = 25; break;
+            case 4: playbackSpeed = 50; break;
+            case 5: playbackSpeed = 100; break;
         }
 
         switch(selectedAlgorithm){
-            case 0: bubbleSort(arrayToSort); break;
-            case 1: quickSort(arrayToSort, 0, arrayToSort.length - 1); break;
-            case 2: insertionSort(arrayToSort); break;
-            case 3: selectionSort(arrayToSort); break;
+            case 0: algorithmStartTime = performance.now(); algorithmRunning = true; setSelectStatus(0); await bubbleSort(arrayToSort); setSelectStatus(1); algorithmRunning = false; algorithmEndTime = performance.now(); timeToExecute = (algorithmEndTime-algorithmStartTime); break;
+            case 1: algorithmStartTime = performance.now(); algorithmRunning = true; setSelectStatus(0); await quickSort(arrayToSort, 0, arrayToSort.length - 1); setSelectStatus(1); algorithmRunning = false; algorithmEndTime = performance.now(); timeToExecute = (algorithmEndTime-algorithmStartTime); break;
+            case 2: algorithmStartTime = performance.now(); algorithmRunning = true; setSelectStatus(0); await insertionSort(arrayToSort, 0, arrayToSort.length); setSelectStatus(1); algorithmRunning = false; algorithmEndTime = performance.now(); timeToExecute = (algorithmEndTime-algorithmStartTime); break;
+            case 3: algorithmStartTime = performance.now(); algorithmRunning = true; setSelectStatus(0); await selectionSort(arrayToSort); setSelectStatus(1); algorithmRunning = false; algorithmEndTime = performance.now(); timeToExecute = (algorithmEndTime-algorithmStartTime); break;
+            case 4: algorithmStartTime = performance.now(); algorithmRunning = true; setSelectStatus(0); await mergeSort(arrayToSort, 0, arrayToSort.length); setSelectStatus(1); algorithmRunning = false; algorithmRunning = false; algorithmEndTime = performance.now(); timeToExecute = (algorithmEndTime-algorithmStartTime); break;
         }
     }
     else{
@@ -254,7 +318,27 @@ DESCRIPTION:    SLEEPS EXECUTION WHEN CALLED
 */
 function sleep(ms){
     if(playbackSpeed != 0){
+        totalDelay += playbackSpeed;
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
+/*
+FUNCTION:       SETSELECTSTATUS
+PARAMETERS:     status: enabled/disaabled
+
+DESCRIPTION:    ENABLES/DISABLES THE SELECTS
+*/
+function setSelectStatus(status){
+    var algorithmSelectBox = document.getElementById("algorithm-selection");
+    var speedSelectBox = document.getElementById("speed-selection");
+
+    if(status == 1){ //ENABLED
+        algorithmSelectBox.disabled = false;
+        speedSelectBox.disabled = false;
+    }
+    else if(status == 0){ //DISABLED
+        algorithmSelectBox.disabled = true;
+        speedSelectBox.disabled = true;
+    }
+}
